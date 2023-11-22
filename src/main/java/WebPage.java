@@ -1,10 +1,13 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.URL;
+
+import java.net.URI;
+
 import java.net.URLConnection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -12,20 +15,16 @@ import org.jsoup.nodes.Document;
 
 public class WebPage {
 
-    public static List<String> getPageContainedUrls(String pageUrl){
+    public static List<URI> getPageContainedUrls(URI uri) {
         try {
-//            URL url = new URL(urlString);
-            return findUrls(sourceToDocument(getPageSource(pageUrl)));
+            return findUrls(sourceToDocument(getPageSource(uri)));
         } catch (IOException e) {
-            e.printStackTrace();
             return Collections.emptyList();
         }
     }
 
-    private static String getPageSource(String urlString) throws IOException {
-        URL url = new URL(urlString);
-
-        URLConnection connection = url.openConnection();
+    private static String getPageSource(URI uri) throws IOException {
+        URLConnection connection = uri.toURL().openConnection();
 
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
             StringBuilder stringBuilder = new StringBuilder();
@@ -43,9 +42,12 @@ public class WebPage {
             return Jsoup.parse(htmlContent);
     }
 
-    private static List<String> findUrls(Document document){
+    private static List<URI> findUrls(Document document){
         return document.select("a").stream()
                 .map(link -> link.attr("href"))
+                .map(UrlGenerator::create)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
                 .toList();
     }
 
