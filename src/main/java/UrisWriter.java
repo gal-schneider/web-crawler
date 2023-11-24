@@ -8,7 +8,7 @@ public enum UrisWriter {
     private ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
 
     public void startPrinting(){
-        scheduledExecutorService.schedule(this::handleUriInfoBatchForWriting, 3, TimeUnit.MILLISECONDS);
+        scheduledExecutorService.scheduleWithFixedDelay(this::handleUriInfoBatchForWriting, 3, 1, TimeUnit.SECONDS);
     }
 
     public void shutdown(){
@@ -19,7 +19,7 @@ public enum UrisWriter {
         System.out.println(">>> >>> UrisWriter handleUriInfoBatchForWriting 1");
 
         UriInfoPrintingQueue.INSTANCE.get(50)
-                .forEach(info -> System.out.println(info));
+                .forEach(info -> System.out.println("info=" + info));
     }
 
 

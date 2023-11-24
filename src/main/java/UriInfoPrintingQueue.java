@@ -9,6 +9,7 @@ public enum UriInfoPrintingQueue {
     BlockingQueue<UriInformation> uriInfoToPrint = new LinkedBlockingQueue<>();
 
     public void add(UriInformation uriInformation){
+        System.out.println(">>> UriInfoPrintingQueue add uriInformation=" + uriInformation);
         uriInfoToPrint.add(uriInformation);
     }
 
