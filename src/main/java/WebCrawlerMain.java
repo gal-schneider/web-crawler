@@ -2,16 +2,29 @@ import org.apache.commons.lang3.math.NumberUtils;
 
 import java.net.URI;
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class WebCrawlerMain {
+
     public static void main(String[] args){
         main1(new String[]{"https://www.google.com", "2"});
     }
 
     public static void main1(String[] args) {
+        ExecutorService executorService = Executors.newVirtualThreadPerTaskExecutor();
+
         UriAndDepth uriAndDepth = validateAndGet(args);
-        NewUrisConsumingAndProcessing.INSTANCE.startConsuming();
-        WebCrawler webCrawler = new WebCrawler();
+        System.out.println("a1");
+        NewUriProcessing.INSTANCE.setMaxDepth(uriAndDepth.depth());
+        System.out.println("a2");
+        NewUrlProcessingQueue.INSTANCE.addUrl(uriAndDepth.uri(), 1);
+        System.out.println("a3");
+        executorService.submit(() -> NewUrisConsumingAndProcessing.INSTANCE.startConsuming());
+        UrisWriter.INSTANCE.startPrinting();
+        System.out.println("a4");
+//        UrisWriter.INSTANCE.shutdown();
+//        System.out.println("a5");
     }
 
     private static UriAndDepth validateAndGet(String[] args) {

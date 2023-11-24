@@ -1,43 +1,37 @@
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 public enum NewUrlProcessingQueue {
     INSTANCE;
 
     private final Map<URI, Boolean> uriToDummyBoolean = new ConcurrentHashMap<>();
     private final BlockingQueue<UriAndDepth> urisToProcess = new LinkedBlockingQueue<>();
-
-    private final List<NewUrlProcessingQueueObserver> observers = new ArrayList<>();
     public void addUrl(URI uri, int depth){
         uriToDummyBoolean.computeIfAbsent(uri, uriKey -> pushUriToTheToProcessQueueAndGetTheInfo(uriKey, depth));
-        observers.forEach(observer -> observer.newUrlArrived());
     }
 
-    public void addObserver(NewUrlProcessingQueueObserver observer){
-        observers.add(observer);
-    }
-
-    public boolean hasNewUri(){
-        return !urisToProcess.isEmpty();
-    }
-
-    public UriAndDepth getUriToProcess(){
+    public Optional<UriAndDepth> getUriToProcess(){
         try {
-            return urisToProcess.take();
+            return Optional.ofNullable(urisToProcess.poll(3, TimeUnit.MILLISECONDS));
         } catch (InterruptedException e) {
-            throw new IllegalStateException("urisToProcess queue is empty, no one should ask for a uri in this case", e);
+            // !!! Write to errors List
+            throw new IllegalStateException(e);
         }
     }
 
+
     private boolean pushUriToTheToProcessQueueAndGetTheInfo(URI uri, int depth) {
+        NewUriProcessingCountTracing.INSTANCE.processingStart();
         try {
             urisToProcess.put(new UriAndDepth(uri, depth));
         } catch (InterruptedException e) {
+            /// !!!!!!!!!!! to add writing to error list;
+            NewUriProcessingCountTracing.INSTANCE.processingEnd();
             throw new IllegalStateException("urisToProcess queue is full, there should be enough consumers to empty it", e);
         }
         return true;
