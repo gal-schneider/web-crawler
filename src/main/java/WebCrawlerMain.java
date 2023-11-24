@@ -1,48 +1,18 @@
 import org.apache.commons.lang3.math.NumberUtils;
 
 import java.net.URI;
-import java.util.List;
 import java.util.Optional;
 
-public class WebCrawler {
-
-//    private static final Map<URI, UrlInformation> uriToInfo = new HashMap<>();
-
+public class WebCrawlerMain {
     public static void main(String[] args){
         main1(new String[]{"https://www.google.com", "2"});
     }
 
     public static void main1(String[] args) {
         UriAndDepth uriAndDepth = validateAndGet(args);
-        collectContainedLinks(uriAndDepth.uri(), 1, uriAndDepth.depth(), null);
-        printContainedLinks();
+        NewUrisConsumingAndProcessing.INSTANCE.startConsuming();
+        WebCrawler webCrawler = new WebCrawler();
     }
-
-    public static void collectContainedLinks(URI uri, int currentDepth, int requiredDepth, URI baseUri){
-        uri = resolveRelative(uri, baseUri);
-        List<URI> containedUrls = WebPage.getPageContainedUrls(uri);
-
-//        double rank = calculateRank(uri, containedUrls);
-//        NewUrlProcessingQueue.INSTANCE.addUrl(uri, new UriInformation(currentDepth, rank));
-
-        if (currentDepth < requiredDepth){
-            for (URI containedUri: containedUrls) {
-                collectContainedLinks(containedUri, currentDepth + 1, requiredDepth, uri);
-            }
-        }
-    }
-
-    private static URI resolveRelative(URI uri, URI baseURI){
-        if (uri.isAbsolute()) {
-            return uri;
-        }
-        return baseURI.resolve(uri);
-    }
-
-    private static void printContainedLinks(){
-//        System.out.println("urlToInfo=" + uriToInfo);
-    }
-
 
     private static UriAndDepth validateAndGet(String[] args) {
         if (args.length != 2){
