@@ -13,10 +13,13 @@ public enum UriInfoPrintingQueue {
     }
 
     public List<UriInformation> get(int upToSize){
-        List<UriInformation> uriInformations = new ArrayList<>();
-        while (!uriInfoToPrint.isEmpty() && uriInformations.size() < upToSize) {
-            uriInformations.add(uriInfoToPrint.poll());
+        List<UriInformation> uriInformationList = new ArrayList<>();
+        System.out.println(">>> UriInfoPrintingQueue uriInformationList=" + uriInformationList);
+        while (!uriInfoToPrint.isEmpty() && uriInformationList.size() < upToSize) {
+            System.out.println(">>> UriInfoPrintingQueue 2");
+            uriInformationList.add(uriInfoToPrint.poll());
         }
-        return uriInformations;
+        System.out.println(">>> UriInfoPrintingQueue 3");
+        return uriInformationList;
     }
 }

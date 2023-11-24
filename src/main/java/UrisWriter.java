@@ -16,6 +16,8 @@ public enum UrisWriter {
     }
 
     private void handleUriInfoBatchForWriting(){
+        System.out.println(">>> >>> UrisWriter handleUriInfoBatchForWriting 1");
+
         UriInfoPrintingQueue.INSTANCE.get(50)
                 .forEach(info -> System.out.println(info));
     }

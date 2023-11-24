@@ -17,7 +17,7 @@ public class WebPage {
 
     public static List<URI> getPageContainedUrls(URI uri) {
         try {
-            return findUrls(sourceToDocument(getPageSource(uri)));
+            return findUrls(sourceToDocument(getPageSource(uri)), uri);
         } catch (IOException e) {
             return Collections.emptyList();
         }
@@ -42,13 +42,21 @@ public class WebPage {
             return Jsoup.parse(htmlContent);
     }
 
-    private static List<URI> findUrls(Document document){
+    private static List<URI> findUrls(Document document, URI baseUri){
         return document.select("a").stream()
                 .map(link -> link.attr("href"))
                 .map(UrlGenerator::create)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
+                .map(uri -> resolveRelative(uri, baseUri))
                 .toList();
+    }
+
+    private static URI resolveRelative(URI uri, URI baseURI){
+        if (uri.isAbsolute()) {
+            return uri;
+        }
+        return baseURI.resolve(uri);
     }
 
 }
