@@ -1,17 +1,23 @@
 import org.apache.commons.lang3.math.NumberUtils;
 
 import java.net.URI;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 public class WebCrawlerMain {
 
-    public static void main(String[] args){
-        main1(new String[]{"https://www.google.com", "2"});
+    public static void main(String[] args) throws ExecutionException, InterruptedException {
+        LocalDateTime startTime = LocalDateTime.now();
+        main1(new String[]{"https://www.google.com", "4"});
+        System.out.println("Took:" + Duration.between(startTime, LocalDateTime.now()));
     }
 
-    public static void main1(String[] args) {
+    public static void main1(String[] args) throws ExecutionException, InterruptedException {
         ExecutorService executorService = Executors.newVirtualThreadPerTaskExecutor();
 
         UriAndDepth uriAndDepth = validateAndGet(args);
@@ -20,12 +26,33 @@ public class WebCrawlerMain {
         System.out.println("a2");
         NewUrlProcessingQueue.INSTANCE.addUrl(uriAndDepth.uri(), 1);
         System.out.println("a3");
-        executorService.submit(() -> NewUrisConsumingAndProcessing.INSTANCE.startConsuming());
         UrisWriter.INSTANCE.startPrinting();
         System.out.println("a4");
-//        UrisWriter.INSTANCE.shutdown();
-//        System.out.println("a5");
+        Future<Boolean> processingEnded = executorService.submit(() -> {
+            while (NewUrlProcessingQueue.INSTANCE.stillProcessing()){
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+
+            }
+//            while (!NewUriProcessingCountTracing.INSTANCE.processingIsDone()) {
+//                try {
+//                    Thread.sleep(1000);
+//                } catch (InterruptedException e) {
+//                    throw new RuntimeException(e);
+//                }
+//            }
+            return true;
+        });
+        processingEnded.get();
+        UrisWriter.INSTANCE.shutdown();
+        NewUrlProcessingQueue.INSTANCE.shutDown();
+
     }
+
+
 
     private static UriAndDepth validateAndGet(String[] args) {
         if (args.length != 2){
