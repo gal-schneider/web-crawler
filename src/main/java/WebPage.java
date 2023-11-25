@@ -30,7 +30,7 @@ public class WebPage {
             StringBuilder stringBuilder = new StringBuilder();
             String line;
 
-            while ((line = reader.readLine()) != null) {
+            while ((line = reader.readLine()) != null && !Thread.currentThread().isInterrupted()) {
                 stringBuilder.append(line).append("\n");
             }
 

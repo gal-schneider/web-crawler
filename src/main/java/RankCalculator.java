@@ -7,24 +7,7 @@ import java.util.concurrent.locks.ReentrantLock;
 public enum RankCalculator {
     INSTANCE;
 
-    private Lock lock = new ReentrantLock();
-    private Condition notFull = lock.newCondition();
-    private Condition notEmpty = lock.newCondition();
-
-
-    public Lock getLock() {
-        return lock;
-    }
-
-    public Condition getNotFull() {
-        return notFull;
-    }
-
-    public Condition getNotEmpty() {
-        return notEmpty;
-    }
-
-    public static double calculate(URI uri, List<URI> containedUrls){
+    public double calculate(URI uri, List<URI> containedUrls){
         if (containedUrls.isEmpty()){
             return 0;
         }
@@ -35,7 +18,7 @@ public enum RankCalculator {
         return numberOfElementsWithSameDomain / containedUrls.size();
     }
 
-    private static boolean isSameDomain(URI uri1, URI uri2){
+    private boolean isSameDomain(URI uri1, URI uri2){
         return uri1.getHost().equalsIgnoreCase(uri2.getHost());
     }
 }
