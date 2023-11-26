@@ -31,6 +31,7 @@ public class WebPage {
             String line;
 
             while ((line = reader.readLine()) != null && !Thread.currentThread().isInterrupted()) {
+                System.out.println(Thread.currentThread().getId());
                 stringBuilder.append(line).append("\n");
             }
 

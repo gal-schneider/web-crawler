@@ -9,7 +9,7 @@ public enum NewUrlProcessingQueue {
     INSTANCE;
 
     private final ScheduledExecutorService scheduledExecutor = Executors.newScheduledThreadPool(1);
-    private final ExecutorService executor = Executors.newFixedThreadPool(1000); //Executors.newVirtualThreadPerTaskExecutor(); // Executors.newFixedThreadPool(500);
+    private final ExecutorService executor = /*Executors.newFixedThreadPool(1000); */ Executors.newVirtualThreadPerTaskExecutor(); // Executors.newFixedThreadPool(500);
     private final BlockingQueue<UriAndFuture> processingFutures = new LinkedBlockingQueue<>();
 
     private final Map<URI, Boolean> processingUriToDummyBoolean = new ConcurrentHashMap<>();
@@ -41,6 +41,8 @@ public enum NewUrlProcessingQueue {
     private boolean pushUriToTheToProcessQueueAndGetTheInfo(URI uri, int depth) {
         UriAndDepth uriAndDepth = new UriAndDepth(uri, depth);
         CompletableFuture<Void> future = CompletableFuture.runAsync(() ->  NewUriProcessing.INSTANCE.process(uriAndDepth), executor);
+        System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
+//        Future<?> future = executor.submit(() ->  NewUriProcessing.INSTANCE.process(uriAndDepth));
         processingFutures.add(new UriAndFuture(uriAndDepth, future));
         return true;
     }
@@ -77,10 +79,10 @@ public enum NewUrlProcessingQueue {
 
     private static class UriAndFuture{
         private final UriAndDepth uriAndDepth;
-        private final CompletableFuture<?> future;
+        private final Future<?> future;
         private final LocalDateTime startTime = LocalDateTime.now();
 
-        public UriAndFuture(UriAndDepth uriAndDepth, CompletableFuture<?> future) {
+        public UriAndFuture(UriAndDepth uriAndDepth, Future<?> future) {
             this.uriAndDepth = uriAndDepth;
             this.future = future;
         }

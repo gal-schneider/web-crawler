@@ -13,7 +13,7 @@ public class WebCrawlerMain {
 
     public static void main(String[] args) throws ExecutionException, InterruptedException {
         LocalDateTime startTime = LocalDateTime.now();
-        main1(new String[]{"https://www.google.com", "4"});
+        main1(new String[]{"https://www.google.com", "2"});
         System.out.println("Took:" + Duration.between(startTime, LocalDateTime.now()));
     }
 
