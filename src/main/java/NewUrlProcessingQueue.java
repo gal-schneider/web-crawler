@@ -13,7 +13,6 @@ public enum NewUrlProcessingQueue {
     private final BlockingQueue<UriAndFuture> processingFutures = new LinkedBlockingQueue<>();
 
     private final Map<URI, Boolean> processingUriToDummyBoolean = new ConcurrentHashMap<>();
-//    private final BlockingQueue<UriAndDepth> urisToProcess = new LinkedBlockingQueue<>();
 
     NewUrlProcessingQueue(){
         scheduledExecutor.scheduleWithFixedDelay(() -> {
@@ -25,7 +24,6 @@ public enum NewUrlProcessingQueue {
 
 
     public void addUrl(URI uri, int depth){
-//        System.out.println("NewUrlProcessingQueue addUrl 1 uri=" + uri);
         processingUriToDummyBoolean.computeIfAbsent(uri, uriKey -> pushUriToTheToProcessQueueAndGetTheInfo(uriKey, depth));
     }
 
@@ -42,9 +40,7 @@ public enum NewUrlProcessingQueue {
 
     private boolean pushUriToTheToProcessQueueAndGetTheInfo(URI uri, int depth) {
         UriAndDepth uriAndDepth = new UriAndDepth(uri, depth);
-        CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
-            NewUriProcessing.INSTANCE.process(uriAndDepth);
-        }, executor);
+        CompletableFuture<Void> future = CompletableFuture.runAsync(() ->  NewUriProcessing.INSTANCE.process(uriAndDepth), executor);
         processingFutures.add(new UriAndFuture(uriAndDepth, future));
         return true;
     }
@@ -89,16 +85,16 @@ public enum NewUrlProcessingQueue {
             this.future = future;
         }
 
-        public UriAndDepth getUriAndDepth() {
-            return uriAndDepth;
-        }
-
-        public CompletableFuture<?> getFuture() {
-            return future;
-        }
-
-        public LocalDateTime getStartTime() {
-            return startTime;
-        }
+//        public UriAndDepth getUriAndDepth() {
+//            return uriAndDepth;
+//        }
+//
+//        public CompletableFuture<?> getFuture() {
+//            return future;
+//        }
+//
+//        public LocalDateTime getStartTime() {
+//            return startTime;
+//        }
     }
 }

@@ -18,16 +18,19 @@ public class WebCrawlerMain {
     }
 
     public static void main1(String[] args) throws ExecutionException, InterruptedException {
-        ExecutorService executorService = Executors.newVirtualThreadPerTaskExecutor();
 
         UriAndDepth uriAndDepth = validateAndGet(args);
-        System.out.println("a1");
         NewUriProcessing.INSTANCE.setMaxDepth(uriAndDepth.depth());
-        System.out.println("a2");
         NewUrlProcessingQueue.INSTANCE.addUrl(uriAndDepth.uri(), 1);
-        System.out.println("a3");
         UrisWriter.INSTANCE.startPrinting();
-        System.out.println("a4");
+        waitForProcessingToEnd();
+        UrisWriter.INSTANCE.shutdown();
+        NewUrlProcessingQueue.INSTANCE.shutDown();
+
+    }
+
+    private static void waitForProcessingToEnd() throws InterruptedException, ExecutionException {
+        ExecutorService executorService = Executors.newVirtualThreadPerTaskExecutor();
         Future<Boolean> processingEnded = executorService.submit(() -> {
             while (NewUrlProcessingQueue.INSTANCE.stillProcessing()){
                 try {
@@ -37,22 +40,10 @@ public class WebCrawlerMain {
                 }
 
             }
-//            while (!NewUriProcessingCountTracing.INSTANCE.processingIsDone()) {
-//                try {
-//                    Thread.sleep(1000);
-//                } catch (InterruptedException e) {
-//                    throw new RuntimeException(e);
-//                }
-//            }
             return true;
         });
         processingEnded.get();
-        UrisWriter.INSTANCE.shutdown();
-        NewUrlProcessingQueue.INSTANCE.shutDown();
-
     }
-
-
 
     private static UriAndDepth validateAndGet(String[] args) {
         if (args.length != 2){
