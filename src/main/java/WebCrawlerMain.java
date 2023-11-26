@@ -12,13 +12,11 @@ import java.util.concurrent.Future;
 public class WebCrawlerMain {
 
     public static void main(String[] args) throws ExecutionException, InterruptedException {
-        LocalDateTime startTime = LocalDateTime.now();
         main1(new String[]{"https://www.google.com", "2"});
-        System.out.println("Took:" + Duration.between(startTime, LocalDateTime.now()));
     }
 
     public static void main1(String[] args) throws ExecutionException, InterruptedException {
-
+        LocalDateTime startTime = LocalDateTime.now();
         UriAndDepth uriAndDepth = validateAndGet(args);
         NewUriProcessing.INSTANCE.setMaxDepth(uriAndDepth.depth());
         NewUrlProcessingQueue.INSTANCE.addUrl(uriAndDepth.uri(), 1);
@@ -26,7 +24,7 @@ public class WebCrawlerMain {
         waitForProcessingToEnd();
         UrisWriter.INSTANCE.shutdown();
         NewUrlProcessingQueue.INSTANCE.shutDown();
-
+        System.out.println("Took:" + Duration.between(startTime, LocalDateTime.now()));
     }
 
     private static void waitForProcessingToEnd() throws InterruptedException, ExecutionException {

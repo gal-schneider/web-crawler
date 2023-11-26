@@ -9,7 +9,7 @@ public enum NewUrlProcessingQueue {
     INSTANCE;
 
     private final ScheduledExecutorService scheduledExecutor = Executors.newScheduledThreadPool(1);
-    private final ExecutorService executor = /*Executors.newFixedThreadPool(1000); */ Executors.newVirtualThreadPerTaskExecutor(); // Executors.newFixedThreadPool(500);
+    private final ExecutorService executor = Executors.newFixedThreadPool(100); // Executors.newVirtualThreadPerTaskExecutor(); // Executors.newFixedThreadPool(500);
     private final BlockingQueue<UriAndFuture> processingFutures = new LinkedBlockingQueue<>();
 
     private final Map<URI, Boolean> processingUriToDummyBoolean = new ConcurrentHashMap<>();

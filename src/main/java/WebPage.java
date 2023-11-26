@@ -24,17 +24,19 @@ public class WebPage {
     }
 
     private static String getPageSource(URI uri) throws IOException {
+        System.out.println("Start " + Thread.currentThread().getName() + ", uri=" + uri);
         URLConnection connection = uri.toURL().openConnection();
+        System.out.println("Con " + Thread.currentThread().getName());
 
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
             StringBuilder stringBuilder = new StringBuilder();
             String line;
 
             while ((line = reader.readLine()) != null && !Thread.currentThread().isInterrupted()) {
-                System.out.println(Thread.currentThread().getId());
+                System.out.println("Process=" + Thread.currentThread().getName());
                 stringBuilder.append(line).append("\n");
             }
-
+            System.out.println("Done" + Thread.currentThread().getName());
             return stringBuilder.toString();
         }
     }
