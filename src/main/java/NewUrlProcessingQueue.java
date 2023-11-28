@@ -54,13 +54,13 @@ public enum NewUrlProcessingQueue {
                 .toList();
         killedStuckUris = killedStuckUris + stuckFutures.size();
         removeAllStuckFuturesFromProcessingUriMap(stuckFutures);
-        removeAllStuckFuturesFromFuturesQueue(FUTURE_IS_STUCK_PREDICATE);
+        removeAllStuckFuturesFromFuturesQueue();
     }
 
 
-    private void removeAllStuckFuturesFromFuturesQueue(Predicate<UriAndFuture> futureIsStuckPredicate) {
+    private void removeAllStuckFuturesFromFuturesQueue() {
         System.out.println("\u001B[31m Killed stuck urls: " + killedStuckUris + "\u001B[0m");
-        processingFutures.removeIf(futureIsStuckPredicate);
+        processingFutures.removeIf(NewUrlProcessingQueue.FUTURE_IS_STUCK_PREDICATE);
     }
 
     private void removeAllStuckFuturesFromProcessingUriMap(List<UriAndFuture> stuckFutures) {
