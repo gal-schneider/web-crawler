@@ -1,17 +1,20 @@
 import java.net.URI;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public enum ProcessingErrors {
     INSTANCE;
 
-    private ConcurrentMap<URI, Exception> errors = new ConcurrentHashMap<>();
+//    private ConcurrentMap<URI, Exception> errors = new ConcurrentHashMap<>();
+    List<Error> errors = new CopyOnWriteArrayList<>();
 
-    public void add(URI uri, Exception ex){
-        errors.put(uri, ex);
+    public void add(URI uri, Exception ex, String message){
+        errors.add(new Error(uri, ex, message));
     }
 
-    public ConcurrentMap<URI, Exception> getAll(){
-        return errors;
+    public void printAll(){
+        errors.forEach(System.out::println);
     }
+
+    private record Error(URI uri, Exception ex, String message){}
 }

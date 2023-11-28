@@ -17,29 +17,12 @@ public class WebPage {
 
     public static List<URI> getPageContainedUrls(URI uri) {
         try {
-            return findUrls(sourceToDocument(getPageSource(uri)), uri);
-        } catch (IOException e) {
+            return findUrls(sourceToDocument(ParallelPageFetcher.INSTANCE.getPageSource(uri)), uri);
+        } catch (Exception e) {
             return Collections.emptyList();
         }
     }
 
-    private static String getPageSource(URI uri) throws IOException {
-        System.out.println("Start " + Thread.currentThread().getName() + ", uri=" + uri);
-        URLConnection connection = uri.toURL().openConnection();
-        System.out.println("Con " + Thread.currentThread().getName());
-
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
-            StringBuilder stringBuilder = new StringBuilder();
-            String line;
-
-            while ((line = reader.readLine()) != null && !Thread.currentThread().isInterrupted()) {
-                System.out.println("Process=" + Thread.currentThread().getName());
-                stringBuilder.append(line).append("\n");
-            }
-            System.out.println("Done" + Thread.currentThread().getName());
-            return stringBuilder.toString();
-        }
-    }
 
     private static Document sourceToDocument(String htmlContent){
             return Jsoup.parse(htmlContent);

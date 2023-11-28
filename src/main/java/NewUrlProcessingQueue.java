@@ -8,17 +8,19 @@ import java.util.function.Predicate;
 public enum NewUrlProcessingQueue {
     INSTANCE;
 
-    private final ScheduledExecutorService scheduledExecutor = Executors.newScheduledThreadPool(1);
-    private final ExecutorService executor = Executors.newFixedThreadPool(100); // Executors.newVirtualThreadPerTaskExecutor(); // Executors.newFixedThreadPool(500);
-    private final BlockingQueue<UriAndFuture> processingFutures = new LinkedBlockingQueue<>();
+    private final static Predicate<UriAndFuture> FUTURE_IS_STUCK_PREDICATE = (uriAndFuture) ->  LocalDateTime.now().isAfter(uriAndFuture.startTime.plusMinutes(3));
 
+    private final ScheduledExecutorService scheduledExecutor = Executors.newScheduledThreadPool(1);
+    private final ExecutorService executor =  Executors.newFixedThreadPool(100); // Executors.newVirtualThreadPerTaskExecutor();
+    private final BlockingQueue<UriAndFuture> processingFutures = new LinkedBlockingQueue<>();
     private final Map<URI, Boolean> processingUriToDummyBoolean = new ConcurrentHashMap<>();
+    private int killedStuckUris = 0;
 
     NewUrlProcessingQueue(){
         scheduledExecutor.scheduleWithFixedDelay(() -> {
             System.out.println("\u001B[34m NewUrlProcessingQueue removing futures \u001B[0m");
             processingFutures.removeIf(uriAndFuture -> !uriAndFuture.future.state().equals(Future.State.RUNNING));
-            rerunUriForStuckFutures();
+            KillStuckUris();
         }, 4, 3, TimeUnit.SECONDS);
     }
 
@@ -41,29 +43,22 @@ public enum NewUrlProcessingQueue {
     private boolean pushUriToTheToProcessQueueAndGetTheInfo(URI uri, int depth) {
         UriAndDepth uriAndDepth = new UriAndDepth(uri, depth);
         CompletableFuture<Void> future = CompletableFuture.runAsync(() ->  NewUriProcessing.INSTANCE.process(uriAndDepth), executor);
-        System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
-//        Future<?> future = executor.submit(() ->  NewUriProcessing.INSTANCE.process(uriAndDepth));
         processingFutures.add(new UriAndFuture(uriAndDepth, future));
         return true;
     }
 
-    private void rerunUriForStuckFutures(){
-        Predicate<UriAndFuture> futureIsStuckPredicate = (uriAndFuture) ->  LocalDateTime.now().isAfter(uriAndFuture.startTime.plusMinutes(6));
+    private void KillStuckUris(){
         List<UriAndFuture> stuckFutures = processingFutures.stream()
-                .filter(futureIsStuckPredicate)
+                .filter(FUTURE_IS_STUCK_PREDICATE)
                 .toList();
-        System.out.println("\u001B[31m stuckFutures size=" + stuckFutures.size() + "\u001B[0m");
-        cancelAllStuckFutures(stuckFutures);
+        killedStuckUris = killedStuckUris + stuckFutures.size();
         removeAllStuckFuturesFromProcessingUriMap(stuckFutures);
-        removeAllStuckFuturesFromFuturesQueue(futureIsStuckPredicate);
-        addUrisOfStuckFuturesAgain(stuckFutures);
+        removeAllStuckFuturesFromFuturesQueue(FUTURE_IS_STUCK_PREDICATE);
     }
 
-    private void addUrisOfStuckFuturesAgain(List<UriAndFuture> stuckFutures) {
-        stuckFutures.forEach(uriAndFuture -> addUrl(uriAndFuture.uriAndDepth.uri(), uriAndFuture.uriAndDepth.depth()));
-    }
 
     private void removeAllStuckFuturesFromFuturesQueue(Predicate<UriAndFuture> futureIsStuckPredicate) {
+        System.out.println("\u001B[31m Killed stuck urls: " + killedStuckUris + "\u001B[0m");
         processingFutures.removeIf(futureIsStuckPredicate);
     }
 
@@ -71,10 +66,6 @@ public enum NewUrlProcessingQueue {
         stuckFutures.forEach(uriAndFuture ->
                 processingUriToDummyBoolean.remove(uriAndFuture.uriAndDepth.uri())
         );
-    }
-
-    private static void cancelAllStuckFutures(List<UriAndFuture> stuckFutures) {
-        stuckFutures.forEach(uriAndFuture -> uriAndFuture.future.cancel(true));
     }
 
     private static class UriAndFuture{
@@ -87,16 +78,5 @@ public enum NewUrlProcessingQueue {
             this.future = future;
         }
 
-//        public UriAndDepth getUriAndDepth() {
-//            return uriAndDepth;
-//        }
-//
-//        public CompletableFuture<?> getFuture() {
-//            return future;
-//        }
-//
-//        public LocalDateTime getStartTime() {
-//            return startTime;
-//        }
     }
 }

@@ -22,7 +22,7 @@ public enum UrisWriter {
 
     private void handleUriInfoBatchForWriting(){
         UriInfoPrintingQueue.INSTANCE.get(500)
-                .forEach(info -> System.out.println("info=" + info));
+                .forEach(info -> UrisFileWriter.INSTANCE.addLine(info));
     }
 
 

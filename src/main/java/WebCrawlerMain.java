@@ -12,16 +12,18 @@ import java.util.concurrent.Future;
 public class WebCrawlerMain {
 
     public static void main(String[] args) throws ExecutionException, InterruptedException {
-        main1(new String[]{"https://www.google.com", "2"});
+        main1(new String[]{"https://www.google.com", "5", "d:\\gal\\temp\\crawler_output.txt"});
     }
 
     public static void main1(String[] args) throws ExecutionException, InterruptedException {
         LocalDateTime startTime = LocalDateTime.now();
         UriAndDepth uriAndDepth = validateAndGet(args);
         NewUriProcessing.INSTANCE.setMaxDepth(uriAndDepth.depth());
+        UrisFileWriter.INSTANCE.start(args[2]);
         NewUrlProcessingQueue.INSTANCE.addUrl(uriAndDepth.uri(), 1);
         UrisWriter.INSTANCE.startPrinting();
         waitForProcessingToEnd();
+        ProcessingErrors.INSTANCE.printAll();
         UrisWriter.INSTANCE.shutdown();
         NewUrlProcessingQueue.INSTANCE.shutDown();
         System.out.println("Took:" + Duration.between(startTime, LocalDateTime.now()));
@@ -44,8 +46,8 @@ public class WebCrawlerMain {
     }
 
     private static UriAndDepth validateAndGet(String[] args) {
-        if (args.length != 2){
-            System.out.println("Need to supply URL and depth");
+        if (args.length != 3){
+            System.out.println("Need to supply URL and depth and file path");
             throw new IllegalArgumentException("Need to supply URL and depth");
         }
 
