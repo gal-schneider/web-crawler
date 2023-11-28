@@ -11,11 +11,11 @@ import java.util.concurrent.Future;
 
 public class WebCrawlerMain {
 
-    public static void main(String[] args) throws ExecutionException, InterruptedException {
-        main1(new String[]{"https://www.google.com", "5", "d:\\gal\\temp\\crawler_output.txt"});
+    public static void main1(String[] args) throws ExecutionException, InterruptedException {
+        main(new String[]{"https://www.google.com", "3", "d:\\gal\\temp\\crawler_output.txt"});
     }
 
-    public static void main1(String[] args) throws ExecutionException, InterruptedException {
+    public static void main(String[] args) throws ExecutionException, InterruptedException {
         LocalDateTime startTime = LocalDateTime.now();
         UriAndDepth uriAndDepth = validateAndGet(args);
         NewUriProcessing.INSTANCE.setMaxDepth(uriAndDepth.depth());

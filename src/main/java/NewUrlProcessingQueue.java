@@ -42,7 +42,8 @@ public enum NewUrlProcessingQueue {
 
     private boolean pushUriToTheToProcessQueueAndGetTheInfo(URI uri, int depth) {
         UriAndDepth uriAndDepth = new UriAndDepth(uri, depth);
-        CompletableFuture<Void> future = CompletableFuture.runAsync(() ->  NewUriProcessing.INSTANCE.process(uriAndDepth), executor);
+//        CompletableFuture<Void> future = CompletableFuture.runAsync(() ->  NewUriProcessing.INSTANCE.process(uriAndDepth), executor);
+        Future<?> future = executor.submit(() ->  NewUriProcessing.INSTANCE.process(uriAndDepth));
         processingFutures.add(new UriAndFuture(uriAndDepth, future));
         return true;
     }

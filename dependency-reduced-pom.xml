@@ -18,7 +18,7 @@
             <configuration>
               <transformers>
                 <transformer>
-                  <mainClass>WebCrawler</mainClass>
+                  <mainClass>WebCrawlerMain</mainClass>
                 </transformer>
               </transformers>
             </configuration>
